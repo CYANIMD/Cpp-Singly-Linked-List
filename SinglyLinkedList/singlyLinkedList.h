@@ -36,21 +36,23 @@ public:
 		}
 	}
 	//Добавление элемента в начало списка.
-	void push_front(const T& value) {
+	//Возвращает указатель на добавленный элемент.
+	singlyLinkedListNode<T>* push_front(const T& value) {
 		_first = new singlyLinkedListNode<T>{ value, _first };
+		return _first;
 	}
 	//Добавление элемента в конец списка.
-	void push_back(const T& value) {
+	//Возвращает указатель на добавленный элемент.
+	singlyLinkedListNode<T>* push_back(const T& value) {
 		if (_first == nullptr) {
-			_first = new singlyLinkedListNode<T>{ value };
+			return push_front(value);
 		}
-		else {
-			singlyLinkedListNode<T>* currentNode = _first;
-			while (currentNode->_next != nullptr) {
-				currentNode = currentNode->_next;
-			}
-			currentNode->_next = new singlyLinkedListNode<T>{ value };
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode->_next != nullptr) {
+			currentNode = currentNode->_next;
 		}
+		currentNode->_next = new singlyLinkedListNode<T>{ value };
+		return currentNode->_next;
 	}
 	//Удаление первого элемента списка.
 	void remove_first() {
@@ -76,6 +78,44 @@ public:
 				node->_next = nullptr;
 			}
 		}
+	}
+	//Возвращает количество узлов списка.
+	size_t count() const {
+		size_t result{ 0 };
+		singlyLinkedListNode<T>* node = _first;
+		while (node != nullptr) {
+			result++;
+			node = node->_next;
+		}
+		return result;
+	}
+	//Вставка элемента после указанного узла.
+	//Возвращает указатель на добавленный элемент.
+	//Если указанного узла нет в списке, то возвращается nullptr.
+	singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* node, const T& value) {
+		if (node == nullptr || _first == nullptr) return nullptr;
+
+		singlyLinkedListNode<T>* newNode = new singlyLinkedListNode<T>{ value, node->_next };
+		node->_next = newNode;
+		return newNode;
+	}
+	//Вставка элемента перед указанным узлом.
+	//Возвращает указатель на добавленный элемент.
+	//Если указанного узла нет в списке, то возвращается nullptr.
+	singlyLinkedListNode<T>* insert_before(singlyLinkedListNode<T>* node, T value) {
+		if (node == nullptr || _first == nullptr) return nullptr;
+		if (_first == node) return push_front(value);
+
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr && currentNode->_next != node) {
+			currentNode = currentNode->_next;
+		}
+
+		if (currentNode == nullptr) return nullptr;
+
+		singlyLinkedListNode<T>* newNode = new singlyLinkedListNode<T>{ value, node };
+		currentNode->_next = newNode;
+		return newNode;
 	}
 };
 
