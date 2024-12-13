@@ -94,6 +94,7 @@ public:
 	//Если указанного узла нет в списке, то возвращается nullptr.
 	singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* node, const T& value) {
 		if (node == nullptr || _first == nullptr) return nullptr;
+		if (!hasNode(node)) return nullptr;
 
 		singlyLinkedListNode<T>* newNode = new singlyLinkedListNode<T>{ value, node->_next };
 		node->_next = newNode;
@@ -104,6 +105,8 @@ public:
 	//Если указанного узла нет в списке, то возвращается nullptr.
 	singlyLinkedListNode<T>* insert_before(singlyLinkedListNode<T>* node, T value) {
 		if (node == nullptr || _first == nullptr) return nullptr;
+		if (!hasNode(node)) return nullptr;
+
 		if (_first == node) return push_front(value);
 
 		singlyLinkedListNode<T>* currentNode = _first;
@@ -116,6 +119,15 @@ public:
 		singlyLinkedListNode<T>* newNode = new singlyLinkedListNode<T>{ value, node };
 		currentNode->_next = newNode;
 		return newNode;
+	}
+	//Проверяет, содержит ли список данный узел.
+	bool hasNode(singlyLinkedListNode<T>* node) {
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr) {
+			if (currentNode == node) return true;
+			currentNode = currentNode->_next;
+		}
+		return false;
 	}
 };
 
