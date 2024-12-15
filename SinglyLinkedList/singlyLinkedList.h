@@ -161,6 +161,49 @@ public:
 		_size++;
 		return newNode;
 	}
+	//Сдвиг вправо на k позиций.
+	void rightShift(int k) {
+		if (k < 0) throw std::invalid_argument("k < 0");
+		if (k == 0) return;
+		if (size() == 0 || size() == 1) return;
+		k %= size(); //Определяем число перестановок.
+
+		singlyLinkedListNode<T>* newLastNode = _first;
+		for (size_t i{ 0 }; i < size() - k - 1; i++) {
+			newLastNode = newLastNode->_next;
+		}
+		singlyLinkedListNode<T>* newFirstNode = newLastNode->_next;
+		newLastNode->_next = nullptr;
+		singlyLinkedListNode<T>* oldLastNode = newFirstNode;
+
+		while (oldLastNode->_next != nullptr) {
+			oldLastNode = oldLastNode->_next;
+		}
+		oldLastNode->_next = _first;
+		_first = newFirstNode;
+	}
+	//Сдвиг влево на k позиций.
+	void leftShift(int k) {
+		if (k < 0) throw std::invalid_argument("k < 0");
+		if (k == 0) return;
+		if (size() == 0 || size() == 1) return;
+		k %= size(); //Определяем число перестановок.
+
+		singlyLinkedListNode<T>* newLastNode = _first;
+		for (size_t i{ 0 }; i < k - 1; i++) {
+			newLastNode = newLastNode->_next;
+		}
+		singlyLinkedListNode<T>* newFirstNode = newLastNode->_next;
+		newLastNode->_next = nullptr;
+		singlyLinkedListNode<T>* oldLastNode = newFirstNode;
+
+		while (oldLastNode->_next != nullptr) {
+			oldLastNode = oldLastNode->_next;
+		}
+		oldLastNode->_next = _first;
+		_first = newFirstNode;
+	}
+
 	//Проверяет, содержит ли список данный узел.
 	bool hasNode(const singlyLinkedListNode<T>* const node) const {
 		singlyLinkedListNode<T>* currentNode = _first;
