@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_set>
+#include <functional>
 
 //Класс, реализующий "узел линейного односвязного списка".
 template<typename T>
@@ -42,7 +43,7 @@ public:
 	singlyLinkedList() : _first(nullptr), _size(0) {}
 	//Конструктор копии.
 	singlyLinkedList(const singlyLinkedList<T>& other) : _size(other.size()) {
-		for (size_t i{ 0 }; i < other.size(); ++i) {
+		for (size_t i{ 0 }; i < other.size(); i++) {
 			push_back(other.get(i));
 		}
 	}
@@ -58,7 +59,6 @@ public:
 	singlyLinkedList<T>& operator=(const singlyLinkedList<T>& l2) {
 		if (this != &l2) {
 			clear();
-			this->_size = { l2.size() };
 			for (size_t i{ 0 }; i < l2.size(); ++i) {
 				push_back(l2.get(i));
 			}
@@ -340,6 +340,17 @@ public:
 				result->push_back(node->_data);
 				set.insert(node->_data);
 			}
+			node = node->_next;
+		}
+		return result;
+	}
+	//Возвращает копию линейного односвязного списка.
+	friend singlyLinkedList<T>* copy(const singlyLinkedList<T>* const list) {
+		if (list->isEmpty()) return new singlyLinkedList<T>{};
+		singlyLinkedList<T>* result = new singlyLinkedList<T>{};
+		singlyLinkedListNode<T>* node = list->_first;
+		while (node != nullptr) {
+			result->push_back(node->_data);
 			node = node->_next;
 		}
 		return result;

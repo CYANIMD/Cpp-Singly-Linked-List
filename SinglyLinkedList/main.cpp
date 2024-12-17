@@ -62,7 +62,13 @@ int main() {
 
 
 	singlyLinkedList<int> l1{};
-	l1.push_back(2);
-	singlyLinkedList<int> l2{ };
-	l2 = l1;
+	l1.push_back(-1);
+	l1.push_back(0);
+	l1.push_back(1);
+	singlyLinkedList<int> l2{};
+	l2 = *copy(&l1);;
+	std::cout << "Линейный односвязный через оператор <<: " << l1 << std::endl;
+	std::cout << "Линейный односвязный через оператор <<: " << l2 << std::endl;
+
+	l1 = l2;
 }
