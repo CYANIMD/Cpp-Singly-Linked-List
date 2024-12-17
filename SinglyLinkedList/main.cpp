@@ -60,5 +60,9 @@ int main() {
 	my_list1->leftShift(1);
 	std::cout << "Линейный односвязный список смещённый на 1 позиции влево через оператор <<: " << *my_list1 << std::endl;
 
-	delete my_list1;
+
+	singlyLinkedList<int> l1{};
+	l1.push_back(2);
+	singlyLinkedList<int> l2{ };
+	l2 = l1;
 }

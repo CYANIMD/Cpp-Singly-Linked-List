@@ -40,9 +40,30 @@ private:
 public:
 	//Конструктор по умолчанию.
 	singlyLinkedList() : _first(nullptr), _size(0) {}
+	//Конструктор копии.
+	singlyLinkedList(const singlyLinkedList<T>& other) : _size(other.size()) {
+		for (size_t i{ 0 }; i < other.size(); ++i) {
+			push_back(other.get(i));
+		}
+	}
+
 	//Деструктор.
 	~singlyLinkedList() {
 		clear();
+	}
+
+	//Операторы.
+
+	//Оператор присваивания.
+	singlyLinkedList<T>& operator=(const singlyLinkedList<T>& l2) {
+		if (this != &l2) {
+			clear();
+			this->_size = { l2.size() };
+			for (size_t i{ 0 }; i < l2.size(); ++i) {
+				push_back(l2.get(i));
+			}
+			return *this;
+		}
 	}
 	//Оператор вывода в поток.
 	friend std::ostream& operator<<(std::ostream& os, const singlyLinkedList<T>& list) {
@@ -66,6 +87,20 @@ public:
 	}
 	//Оператор доступа к значению узла с заданным индексом.
 	const T& operator[](int index) const {
+		if (index < 0) throw std::invalid_argument("index < 0");
+		if (index >= size())throw std::invalid_argument("index >= size()");
+		singlyLinkedListNode<T>* node = _first;
+		while (index > 0) {
+			node = node->_next;
+			index--;
+		}
+		return node->_data;
+	}
+
+	//Методы.
+
+	//Возвращает элемент узла с заданным индексом.
+	T get(int index) const {
 		if (index < 0) throw std::invalid_argument("index < 0");
 		if (index >= size())throw std::invalid_argument("index >= size()");
 		singlyLinkedListNode<T>* node = _first;
@@ -161,6 +196,37 @@ public:
 		_size++;
 		return newNode;
 	}
+	//Проверяет, содержит ли список данный узел.
+	bool hasNode(const singlyLinkedListNode<T>* const node) const {
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr) {
+			if (currentNode == node) return true;
+			currentNode = currentNode->_next;
+		}
+		return false;
+	}
+	//Проверяет, содержит ли список данное значение.
+	bool hasValue(const T& value) const {
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr) {
+			if (currentNode->_data == value) return true;
+			currentNode = currentNode->_next;
+		}
+		return false;
+	}
+	//Проверяет, пустой ли список.
+	bool isEmpty() const {
+		return _first == nullptr; //Можно написать _size == 0
+	}
+	//Очистка списка с высвобождением затрачиваемой памяти.
+	void clear() {
+		while (_first != nullptr) { //Проход по всем узлам и освобождение ресурсов, затрачиваемых на них.
+			singlyLinkedListNode<T>* node = _first;
+			_first = _first->_next;
+			delete node;
+		}
+		_size = 0;
+	}
 	//Сдвиг вправо на k позиций.
 	void rightShift(int k) {
 		if (k < 0) throw std::invalid_argument("k < 0");
@@ -202,38 +268,6 @@ public:
 		}
 		oldLastNode->_next = _first;
 		_first = newFirstNode;
-	}
-
-	//Проверяет, содержит ли список данный узел.
-	bool hasNode(const singlyLinkedListNode<T>* const node) const {
-		singlyLinkedListNode<T>* currentNode = _first;
-		while (currentNode != nullptr) {
-			if (currentNode == node) return true;
-			currentNode = currentNode->_next;
-		}
-		return false;
-	}
-	//Проверяет, содержит ли список данное значение.
-	bool hasValue(const T& value) const {
-		singlyLinkedListNode<T>* currentNode = _first;
-		while (currentNode != nullptr) {
-			if (currentNode->_data == value) return true;
-			currentNode = currentNode->_next;
-		}
-		return false;
-	}
-	//Очистка списка с высвобождением затрачиваемой памяти.
-	void clear() {
-		while (_first != nullptr) { //Проход по всем узлам и освобождение ресурсов, затрачиваемых на них.
-			singlyLinkedListNode<T>* node = _first;
-			_first = _first->_next;
-			delete node;
-		}
-		_size = 0;
-	}
-	//Проверяет, пустой ли список.
-	bool isEmpty() const {
-		return _first == nullptr; //Можно написать _size == 0
 	}
 
 	//Возвращает реверсированный исходный линейный односвязный список.
