@@ -47,7 +47,6 @@ public:
 			push_back(other.get(i));
 		}
 	}
-
 	//Деструктор.
 	~singlyLinkedList() {
 		clear();
@@ -85,7 +84,7 @@ public:
 		}
 		return node->_data;
 	}
-	//Оператор доступа к значению узла с заданным индексом.
+	//Оператор доступа к константному значению узла с заданным индексом.
 	const T& operator[](int index) const {
 		if (index < 0) throw std::invalid_argument("index < 0");
 		if (index >= size())throw std::invalid_argument("index >= size()");
@@ -97,8 +96,37 @@ public:
 		return node->_data;
 	}
 
+	//Дружественные методы.
+
+	//Возвращает реверсированный исходный линейный односвязный список.
+	template<typename T>
+	friend singlyLinkedList<T>* reverse(const singlyLinkedList<T>* const list);
+	//Возвращает указатель на первое вхождение в список указанного значения.
+	//Если такого вхождения нет, то возвращается nullptr.
+	template<typename T>
+	friend singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, T value);
+	//Обход линейного односвязного списка с выполнением заданного метода.
+	template<typename T>
+	friend void for_each(const singlyLinkedList<T>* const list, void(*f)(const T&));
+	//Вывод в консоль узлов линейного односвязного списка и их связей.
+	template<typename T>
+	friend void print(const singlyLinkedList<T>* const list);
+	//Возвращает указатель на линейный односвязный список, полученный путём слияние двух исходных линейный односвязных списков.
+	template<typename T>
+	friend singlyLinkedList<T>* merge(const singlyLinkedList<T>* const list1, const singlyLinkedList<T>* const list2);
+	//Возвращает линейный односвязный список без дубликатов.
+	template<typename T>
+	friend singlyLinkedList<T>* distinct(const singlyLinkedList<T>* const list);
+	//Возвращает копию линейного односвязного списка.
+	template<typename T>
+	friend singlyLinkedList<T>* copy(const singlyLinkedList<T>* const list);
+
 	//Методы.
 
+	//Возвращает размер списка.
+	size_t size() const {
+		return _size;
+	}
 	//Возвращает элемент узла с заданным индексом.
 	T get(int index) const {
 		if (index < 0) throw std::invalid_argument("index < 0");
@@ -110,9 +138,36 @@ public:
 		}
 		return node->_data;
 	}
-	//Возвращает размер списка.
-	size_t size() const {
-		return _size;
+	//Проверяет, содержит ли список данный узел.
+	bool hasNode(const singlyLinkedListNode<T>* const node) const {
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr) {
+			if (currentNode == node) return true;
+			currentNode = currentNode->_next;
+		}
+		return false;
+	}
+	//Проверяет, содержит ли список данное значение.
+	bool hasValue(const T& value) const {
+		singlyLinkedListNode<T>* currentNode = _first;
+		while (currentNode != nullptr) {
+			if (currentNode->_data == value) return true;
+			currentNode = currentNode->_next;
+		}
+		return false;
+	}
+	//Проверяет, пустой ли список.
+	bool isEmpty() const {
+		return _first == nullptr; //Можно написать _size == 0
+	}
+	//Очистка списка с высвобождением затрачиваемой памяти.
+	void clear() {
+		while (_first != nullptr) { //Проход по всем узлам и освобождение ресурсов, затрачиваемых на них.
+			singlyLinkedListNode<T>* node = _first;
+			_first = _first->_next;
+			delete node;
+		}
+		_size = 0;
 	}
 	//Добавление элемента в начало списка.
 	//Возвращает указатель на добавленный элемент.
@@ -196,37 +251,6 @@ public:
 		_size++;
 		return newNode;
 	}
-	//Проверяет, содержит ли список данный узел.
-	bool hasNode(const singlyLinkedListNode<T>* const node) const {
-		singlyLinkedListNode<T>* currentNode = _first;
-		while (currentNode != nullptr) {
-			if (currentNode == node) return true;
-			currentNode = currentNode->_next;
-		}
-		return false;
-	}
-	//Проверяет, содержит ли список данное значение.
-	bool hasValue(const T& value) const {
-		singlyLinkedListNode<T>* currentNode = _first;
-		while (currentNode != nullptr) {
-			if (currentNode->_data == value) return true;
-			currentNode = currentNode->_next;
-		}
-		return false;
-	}
-	//Проверяет, пустой ли список.
-	bool isEmpty() const {
-		return _first == nullptr; //Можно написать _size == 0
-	}
-	//Очистка списка с высвобождением затрачиваемой памяти.
-	void clear() {
-		while (_first != nullptr) { //Проход по всем узлам и освобождение ресурсов, затрачиваемых на них.
-			singlyLinkedListNode<T>* node = _first;
-			_first = _first->_next;
-			delete node;
-		}
-		_size = 0;
-	}
 	//Сдвиг вправо на k позиций.
 	void rightShift(int k) {
 		if (k < 0) throw std::invalid_argument("k < 0");
@@ -269,93 +293,128 @@ public:
 		oldLastNode->_next = _first;
 		_first = newFirstNode;
 	}
+	//Разбивает часть списка, начинающуюся с указанного узла, на две половины.
+	//Первая половина записывается в исходный список, а вторая половина возвращается в виде указателя.
+	singlyLinkedList<T>* split(const singlyLinkedListNode<T>* node) {
+		if (node == nullptr) return nullptr;
 
-	//Возвращает реверсированный исходный линейный односвязный список.
-	friend singlyLinkedList<T>* reverse(const singlyLinkedList<T>* const list) {
-		if (list->_first == nullptr) return nullptr;
-
-		singlyLinkedList<T>* result = new singlyLinkedList<T>();
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			result->push_front(node->_data);
-			node = node->_next;
+		//Объявляем два указателя: один быстрее другого в два раза.
+		singlyLinkedListNode<T>* slow = const_cast<singlyLinkedListNode<T>*>(node); //В дальнейшем slow станет последним узлом первой половины списка.
+		singlyLinkedListNode<T>* fast = const_cast<singlyLinkedListNode<T>*>(node); //В дальнейшем fast станет последним узлом второй половины списка.
+		while (fast->_next != nullptr && fast->_next->_next != nullptr) { //Пока не дошли конца списка, в том числе его второй половины.
+			slow = slow->_next;
+			fast = fast->_next->_next;
 		}
-		return result;
-	}
-	//Возвращает указатель на первое вхождение в список указанного значения.
-	//Если такого вхождения нет, то возвращается nullptr.
-	friend singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, T value) {
-		if (list->_first == nullptr) return nullptr;
-
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			if (node->_data == value) return node;
-			node = node->_next;
-		}
-		return nullptr;
-	}
-	//Обход линейного односвязного списка с выполнением заданного метода.
-	friend void for_each(const singlyLinkedList<T>* const list, void(*f)(const T&)) {
-		if (list->_first == nullptr) return;
-
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			f(node->_data);
-			node = node->_next;
-		}
-	}
-	//Вывод в консоль узлов линейного односвязного списка и их связей.
-	friend void print(const singlyLinkedList<T>* const list) {
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			std::cout << node->_data << "->";
-			node = node->_next;
-		}
-		std::cout << "||" << std::endl;
-	}
-	//Возвращает указатель на линейный односвязный список, полученный путём слияние двух исходных линейный односвязных списков.
-	friend singlyLinkedList<T>* merge(const singlyLinkedList<T>* const list1, const singlyLinkedList<T>* const list2) {
-		singlyLinkedList<T>* result = new singlyLinkedList<T>();
-		singlyLinkedListNode<T>* node1 = list1->_first;
-		while (node1 != nullptr) {
-			result->push_back(node1->_data);
-			node1 = node1->_next;
-		}
-		singlyLinkedListNode<T>* node2 = list2->_first;
-		while (node2 != nullptr) {
-			result->push_back(node2->_data);
-			node2 = node2->_next;
-		}
-		return result;
-	}
-	//Возвращает линейный односвязный список без дубликатов.
-	friend singlyLinkedList<T>* distinct(const singlyLinkedList<T>* const list) {
-		if (list->_first == nullptr) return nullptr;
-
-		std::unordered_set<T> set{ };
-		singlyLinkedList<T>* result = new singlyLinkedList<T>();
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			if (set.count(node->_data) == 0) {
-				result->push_back(node->_data);
-				set.insert(node->_data);
-			}
-			node = node->_next;
-		}
-		return result;
-	}
-	//Возвращает копию линейного односвязного списка.
-	friend singlyLinkedList<T>* copy(const singlyLinkedList<T>* const list) {
-		if (list->isEmpty()) return new singlyLinkedList<T>{};
+		singlyLinkedListNode<T>* secondHalfPart = slow->_next; //Указатель на вторую половину списка.
+		slow->_next = nullptr;
 		singlyLinkedList<T>* result = new singlyLinkedList<T>{};
-		singlyLinkedListNode<T>* node = list->_first;
-		while (node != nullptr) {
-			result->push_back(node->_data);
-			node = node->_next;
+		result->_first = secondHalfPart;
+		//Вычисление количества узлов в первой и во второй половинах после разбиения.
+		int count{ 0 }; //Число узлов во второй половине списка.
+		while (secondHalfPart != nullptr) {
+			count++;
+			secondHalfPart = secondHalfPart->_next;
 		}
+		result->_size = count;
+		this->_size -= count;
 		return result;
 	}
 };
 
+//Дружественные методы.
+
+//Возвращает реверсированный исходный линейный односвязный список.
+template<typename T>
+singlyLinkedList<T>* reverse(const singlyLinkedList<T>* const list) {
+	if (list->_first == nullptr) return nullptr;
+
+	singlyLinkedList<T>* result = new singlyLinkedList<T>();
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		result->push_front(node->_data);
+		node = node->_next;
+	}
+	return result;
+}
+//Возвращает указатель на первое вхождение в список указанного значения.
+//Если такого вхождения нет, то возвращается nullptr.
+template<typename T>
+singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, T value) {
+	if (list->_first == nullptr) return nullptr;
+
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		if (node->_data == value) return node;
+		node = node->_next;
+	}
+	return nullptr;
+}
+//Обход линейного односвязного списка с выполнением заданного метода.
+template<typename T>
+void for_each(const singlyLinkedList<T>* const list, void(*f)(const T&)) {
+	if (list->_first == nullptr) return;
+
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		f(node->_data);
+		node = node->_next;
+	}
+}
+//Вывод в консоль узлов линейного односвязного списка и их связей.
+template<typename T>
+void print(const singlyLinkedList<T>* const list) {
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		std::cout << node->_data << "->";
+		node = node->_next;
+	}
+	std::cout << "||" << std::endl;
+}
+//Возвращает указатель на линейный односвязный список, полученный путём слияние двух исходных линейный односвязных списков.
+template<typename T>
+singlyLinkedList<T>* merge(const singlyLinkedList<T>* const list1, const singlyLinkedList<T>* const list2) {
+	singlyLinkedList<T>* result = new singlyLinkedList<T>();
+	singlyLinkedListNode<T>* node1 = list1->_first;
+	while (node1 != nullptr) {
+		result->push_back(node1->_data);
+		node1 = node1->_next;
+	}
+	singlyLinkedListNode<T>* node2 = list2->_first;
+	while (node2 != nullptr) {
+		result->push_back(node2->_data);
+		node2 = node2->_next;
+	}
+	return result;
+}
+//Возвращает линейный односвязный список без дубликатов.
+template<typename T>
+singlyLinkedList<T>* distinct(const singlyLinkedList<T>* const list) {
+	if (list->_first == nullptr) return nullptr;
+
+	std::unordered_set<T> set{ };
+	singlyLinkedList<T>* result = new singlyLinkedList<T>();
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		if (set.count(node->_data) == 0) {
+			result->push_back(node->_data);
+			set.insert(node->_data);
+		}
+		node = node->_next;
+	}
+	return result;
+}
+//Возвращает копию линейного односвязного списка.
+template<typename T>
+singlyLinkedList<T>* copy(const singlyLinkedList<T>* const list) {
+	if (list->isEmpty()) return new singlyLinkedList<T>{};
+
+	singlyLinkedList<T>* result = new singlyLinkedList<T>{};
+	singlyLinkedListNode<T>* node = list->_first;
+	while (node != nullptr) {
+		result->push_back(node->_data);
+		node = node->_next;
+	}
+	return result;
+}
 
 #endif __SINGLYLINKEDLIST_
