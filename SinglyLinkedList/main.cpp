@@ -93,7 +93,7 @@ int main() {
 	std::cout << "Линейный односвязный через оператор <<: " << *sll1 << std::endl;
 	auto secondPart = sll1->divideInHalf(); // 13 21
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
-
-
+	secondPart->insert(4, -2);
+	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
 
 }

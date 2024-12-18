@@ -200,13 +200,13 @@ public:
 	}
 	//Добавление элемента в начало списка.
 	//Возвращает указатель на добавленный элемент.
-	const void push_front(const T& value) {
+	void push_front(const T& value) {
 		_first = new singlyLinkedListNode<T>{ value, _first };
 		_size++;
 	}
 	//Добавление элемента в конец списка.
 	//Возвращает указатель на добавленный элемент.
-	const void push_back(const T& value) {
+	void push_back(const T& value) {
 		if (_first == nullptr) {
 			push_front(value); //_size меняется внутри push_front()
 		}
@@ -216,6 +216,14 @@ public:
 		}
 		currentNode->_next = new singlyLinkedListNode<T>{ value };
 		_size++;
+	}
+	//Добавление элемента в указанный индекс списка.
+	void insert(size_t index, const T& value) {
+		if (index == 0) push_front(value);
+		if (index == size()) push_back(value);
+		else {
+			insert_before(getNode(index), value);
+		}
 	}
 	//Удаление первого элемента списка.
 	void pop_front() {
@@ -290,6 +298,16 @@ public:
 		return split(_first);
 	}
 private:
+	//Возвращает узел с указанным индексом.
+	const singlyLinkedListNode<T>* getNode(size_t index) const {
+		if (index >= size()) throw std::invalid_argument("index >= size()");
+		singlyLinkedListNode<T>* node = _first;
+		while (node != nullptr) {
+			if (index == 0) return node;
+			node = node->_next;
+			index--;
+		}
+	}
 	//Проверяет, содержит ли список данный узел.
 	bool contains(const singlyLinkedListNode<T>* const node) const {
 		singlyLinkedListNode<T>* currentNode = _first;
@@ -340,7 +358,7 @@ private:
 	//Вставка элемента после указанного узла.
 	//Возвращает указатель на добавленный элемент.
 	//Если указанного узла нет в списке, то возвращается nullptr.
-	const singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* const node, const T& value) {
+	const singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* node, const T& value) {
 		if (_first == nullptr || node == nullptr) return nullptr;
 		if (!contains(node)) throw std::invalid_argument("singlyLinkedList doesn't have node");
 
@@ -352,12 +370,15 @@ private:
 	//Вставка элемента перед указанным узлом.
 	//Возвращает указатель на добавленный элемент.
 	//Если указанного узла нет в списке, то возвращается nullptr.
-	const singlyLinkedListNode<T>* insert_before(const singlyLinkedListNode<T>* const node, const T& value) {
+	const singlyLinkedListNode<T>* insert_before(const singlyLinkedListNode<T>* node, const T& value) {
 		if (_first == nullptr || node == nullptr) return nullptr;
 		//if (!hasNode(node)) return nullptr;
 		//Проверка излишне увеличит время выполнения метода в два раза.
 
-		if (_first == node) return push_front(value); //_size меняется внутри метода push_front()
+		if (_first == node) {
+			push_front(value); //_size меняется внутри метода push_front()
+			return _first;
+		}
 
 		singlyLinkedListNode<T>* currentNode = _first;
 		while (currentNode != nullptr && currentNode->_next != node) {
