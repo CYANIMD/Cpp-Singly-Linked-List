@@ -74,8 +74,7 @@ public:
 		return os;
 	}
 	//Оператор доступа к значению узла с заданным индексом.
-	T& operator[](int index) {
-		if (index < 0) throw std::invalid_argument("index < 0");
+	T& operator[](size_t index) {
 		if (index >= size())throw std::invalid_argument("index >= size()");
 		singlyLinkedListNode<T>* node = _first;
 		while (index > 0) {
@@ -85,8 +84,7 @@ public:
 		return node->_data;
 	}
 	//Оператор доступа к константному значению узла с заданным индексом.
-	const T& operator[](int index) const {
-		if (index < 0) throw std::invalid_argument("index < 0");
+	const T& operator[](size_t index) const {
 		if (index >= size())throw std::invalid_argument("index >= size()");
 		singlyLinkedListNode<T>* node = _first;
 		while (index > 0) {
@@ -104,7 +102,7 @@ public:
 	//Возвращает указатель на первое вхождение в список указанного значения.
 	//Если такого вхождения нет, то возвращается nullptr.
 	template<typename T>
-	friend singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, T value);
+	friend singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, const T& value);
 	//Обход линейного односвязного списка с выполнением заданного метода.
 	template<typename T>
 	friend void for_each(const singlyLinkedList<T>* const list, void(*f)(const T&));
@@ -128,8 +126,7 @@ public:
 		return _size;
 	}
 	//Возвращает элемент узла с заданным индексом.
-	T get(int index) const {
-		if (index < 0) throw std::invalid_argument("index < 0");
+	T get(size_t index) const {
 		if (index >= size())throw std::invalid_argument("index >= size()");
 		singlyLinkedListNode<T>* node = _first;
 		while (index > 0) {
@@ -252,8 +249,7 @@ public:
 		return newNode;
 	}
 	//Сдвиг вправо на k позиций.
-	void rightShift(int k) {
-		if (k < 0) throw std::invalid_argument("k < 0");
+	void rightShift(size_t k) {
 		if (k == 0) return;
 		if (size() == 0 || size() == 1) return;
 		k %= size(); //Определяем число перестановок.
@@ -273,8 +269,7 @@ public:
 		_first = newFirstNode;
 	}
 	//Сдвиг влево на k позиций.
-	void leftShift(int k) {
-		if (k < 0) throw std::invalid_argument("k < 0");
+	void leftShift(size_t k) {
 		if (k == 0) return;
 		if (size() == 0 || size() == 1) return;
 		k %= size(); //Определяем число перестановок.
@@ -295,7 +290,7 @@ public:
 	}
 	//Разбивает часть списка, начинающуюся с указанного узла, на две половины.
 	//Первая половина записывается в исходный список, а вторая половина возвращается в виде указателя.
-	singlyLinkedList<T>* split(const singlyLinkedListNode<T>* node) {
+	singlyLinkedList<T>* split(const singlyLinkedListNode<T>* const node) {
 		if (node == nullptr) return nullptr;
 
 		//Объявляем два указателя: один быстрее другого в два раза.
@@ -339,7 +334,7 @@ singlyLinkedList<T>* reverse(const singlyLinkedList<T>* const list) {
 //Возвращает указатель на первое вхождение в список указанного значения.
 //Если такого вхождения нет, то возвращается nullptr.
 template<typename T>
-singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, T value) {
+singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, const T& value) {
 	if (list->_first == nullptr) return nullptr;
 
 	singlyLinkedListNode<T>* node = list->_first;
