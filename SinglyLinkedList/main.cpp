@@ -82,16 +82,16 @@ int main() {
 
 	//Проверка работы метода split.
 	singlyLinkedList<int>* sll1 = new singlyLinkedList<int>{};
-	auto _node1 = sll1->push_back(5);
-	auto _node2 = sll1->push_back(7);
-	auto _node3 = sll1->push_back(11);
-	auto _node4 = sll1->push_back(13);
-	auto _node5 = sll1->push_back(21);
-	auto _node6 = sll1->push_front(-2);
+	sll1->push_back(5);
+	sll1->push_back(7);
+	sll1->push_back(11);
+	sll1->push_back(13);
+	sll1->push_back(21);
+	sll1->push_front(-2);
 
 
 	std::cout << "Линейный односвязный через оператор <<: " << *sll1 << std::endl;
-	auto secondPart = sll1->split(_node1); // 13 21
+	auto secondPart = sll1->divideInHalf(); // 13 21
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
 
 
