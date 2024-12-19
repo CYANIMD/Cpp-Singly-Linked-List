@@ -4,7 +4,8 @@
 int main() {
 	setlocale(LC_ALL, "Russian");
 
-	//Проверка основных методов.
+	////Проверка основных методов.
+
 
 	singlyLinkedList<double>* my_list1 = new singlyLinkedList<double>();
 
@@ -27,7 +28,7 @@ int main() {
 	//Проверка вспомогательных методов.
 
 	std::cout << "Линейный односвязный список через метод print(): " << std::endl; print(my_list1);
-	//std::cout << "Линейный односвязный список через метод for_each(): " << std::endl; for_each(my_list1, [](const double& value) {std::cout << value << "=>"; }); std::cout << std::endl;
+	std::cout << "Линейный односвязный список через метод for_each(): " << std::endl; for_each(my_list1, [](const double& value) {std::cout << value << "=>"; }); std::cout << std::endl;
 	my_list1->push_back(-1);
 	my_list1->push_back(3.14);
 	my_list1->push_back(0);
@@ -93,7 +94,7 @@ int main() {
 	std::cout << "Линейный односвязный через оператор <<: " << *sll1 << std::endl;
 	auto secondPart = sll1->divideInHalf(); // 13 21
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
-	secondPart->insert(4, -2);
+	secondPart->insert(3, -2);
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
 
 }

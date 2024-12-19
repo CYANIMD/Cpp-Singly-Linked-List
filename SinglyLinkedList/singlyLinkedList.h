@@ -6,6 +6,8 @@
 #include <unordered_set>
 #include <functional>
 
+
+
 //Класс, реализующий "линейный односвязный список".
 template<typename T>
 class singlyLinkedList {
@@ -45,10 +47,11 @@ public:
 	//Конструктор по умолчанию.
 	singlyLinkedList() : _first(nullptr), _size(0) {}
 	//Конструктор копии.
-	singlyLinkedList(const singlyLinkedList<T>& other) : _size(other.size()) {
-		size_t count = size() - 1;
-		while (count >= 0) {
-			push_front(other[count]);
+	singlyLinkedList(const singlyLinkedList<T>& other) : _size(other.size()), _first(nullptr) {
+		size_t count = other.size();
+		if (count == 0) return;
+		while (count != 0) {
+			push_front(other[count - 1]);
 			count--;
 		}
 	}
@@ -58,11 +61,15 @@ public:
 	}
 
 	//Оператор присваивания.
-	singlyLinkedList<T>& operator=(const singlyLinkedList<T>& l2) {
-		if (this != &l2) {
+	singlyLinkedList<T>& operator=(const singlyLinkedList<T>& other) {
+		if (this != &other) {
 			clear();
-			for (size_t i{ 0 }; i < l2.size(); ++i) {
-				push_back(l2[i]);
+			size_t count = other.size();
+			if (count != 0) {
+				while (count != 0) {
+					push_front(other[count - 1]);
+					count--;
+				}
 			}
 			return *this;
 		}
@@ -71,16 +78,18 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const singlyLinkedList<T>& list) {
 		singlyLinkedListNode<T>* node = list._first;
 		while (node != nullptr) {
-			os << node->_data << ' ';
+			os << *node << ' ';
 			node = node->_next;
 		}
 		return os;
 	}
 	//Оператор доступа к значению узла с заданным индексом.
 	T& operator[](size_t index) {
-		if (index >= size())throw std::invalid_argument("index >= size()");
+		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
+		if (index >= size()) throw std::invalid_argument("index >= size()");
+
 		singlyLinkedListNode<T>* node = _first;
-		while (index > 0) {
+		while (index != 0) { //Важно избежать проблем с памятью из-за типа index!
 			node = node->_next;
 			index--;
 		}
@@ -88,9 +97,11 @@ public:
 	}
 	//Оператор доступа к константному значению узла с заданным индексом.
 	const T& operator[](size_t index) const {
+		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
 		if (index >= size())throw std::invalid_argument("index >= size()");
+
 		singlyLinkedListNode<T>* node = _first;
-		while (index > 0) {
+		while (index != 0) { //Важно избежать проблем с памятью из-за типа index!
 			node = node->_next;
 			index--;
 		}
@@ -98,8 +109,10 @@ public:
 	}
 
 	//Возвращает реверсированный исходный линейный односвязный список.
+	//Если исходный список пустой, то возвращается nullptr.
 	friend singlyLinkedList<T>* reverse(const singlyLinkedList<T>* const list) {
-		if (list->_first == nullptr) return nullptr;
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
+		if (list->isEmpty()) return nullptr;
 
 		singlyLinkedList<T>* result = new singlyLinkedList<T>();
 		singlyLinkedListNode<T>* node = list->_first;
@@ -111,7 +124,9 @@ public:
 	}
 	//Обход линейного односвязного списка с выполнением заданного метода.
 	friend void for_each(const singlyLinkedList<T>* const list, void(*f)(const T&)) {
-		if (list->_first == nullptr) return;
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
+		if (f == nullptr) throw std::invalid_argument("f is nullptr");
+		if (list->isEmpty()) return;
 
 		singlyLinkedListNode<T>* node = list->_first;
 		while (node != nullptr) {
@@ -121,6 +136,7 @@ public:
 	}
 	//Вывод в консоль узлов линейного односвязного списка и их связей.
 	friend void print(const singlyLinkedList<T>* const list) {
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
 		singlyLinkedListNode<T>* node = list->_first;
 		while (node != nullptr) {
 			std::cout << node->_data << "->";
@@ -130,22 +146,35 @@ public:
 	}
 	//Возвращает указатель на линейный односвязный список, полученный путём слияние двух исходных линейный односвязных списков.
 	friend singlyLinkedList<T>* merge(const singlyLinkedList<T>* const list1, const singlyLinkedList<T>* const list2) {
+		if (list1 == nullptr) throw std::invalid_argument("list1 is nullptr");
+		if (list2 == nullptr) throw std::invalid_argument("list2 is nullptr");
+
+		if (list1->isEmpty()) {
+			return new singlyLinkedList<T>(*list2);
+		}
+		if (list2->isEmpty()) {
+			return new singlyLinkedList<T>(*list1);
+		}
 		singlyLinkedList<T>* result = new singlyLinkedList<T>();
-		singlyLinkedListNode<T>* node1 = list1->_first;
-		while (node1 != nullptr) {
-			result->push_back(node1->_data);
-			node1 = node1->_next;
-		}
-		singlyLinkedListNode<T>* node2 = list2->_first;
-		while (node2 != nullptr) {
-			result->push_back(node2->_data);
-			node2 = node2->_next;
-		}
+		size_t size2 = list2->size();
+		do {
+			size2--;
+			result->push_front((*list2)[size2]);
+
+		} while (size2 != 0);
+		size_t size1 = list1->size();
+		do {
+			size1--;
+			result->push_front((*list1)[size1]);
+
+		} while (size1 != 0);
 		return result;
 	}
 	//Возвращает линейный односвязный список без дубликатов.
+	//Если исходный список пустой, то возвращается nullptr.
 	friend singlyLinkedList<T>* distinct(const singlyLinkedList<T>* const list) {
-		if (list->_first == nullptr) return nullptr;
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
+		if (list->isEmpty()) return new singlyLinkedList<T>();
 
 		std::unordered_set<T> set{ };
 		singlyLinkedList<T>* result = new singlyLinkedList<T>();
@@ -161,6 +190,7 @@ public:
 	}
 	//Возвращает копию линейного односвязного списка.
 	friend singlyLinkedList<T>* copy(const singlyLinkedList<T>* const list) {
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
 		if (list->isEmpty()) return new singlyLinkedList<T>{};
 
 		singlyLinkedList<T>* result = new singlyLinkedList<T>{};
@@ -187,7 +217,7 @@ public:
 	}
 	//Проверяет, пустой ли список.
 	bool isEmpty() const {
-		return _first == nullptr; //Можно написать _size == 0
+		return _first == nullptr && _size == 0;
 	}
 	//Очистка списка с высвобождением затрачиваемой памяти.
 	void clear() {
@@ -209,6 +239,7 @@ public:
 	void push_back(const T& value) {
 		if (_first == nullptr) {
 			push_front(value); //_size меняется внутри push_front()
+			return;
 		}
 		singlyLinkedListNode<T>* currentNode = _first;
 		while (currentNode->_next != nullptr) {
@@ -223,6 +254,23 @@ public:
 		if (index == size()) push_back(value);
 		else {
 			insert_before(getNode(index), value);
+		}
+	}
+	//Удаление элемента списка с указанным индексом.
+	void remove(size_t index) {
+		if (index >= size()) throw std::invalid_argument("index >= size()");
+		if (index == 0) pop_front();
+		else if (index == size() - 1) pop_back();
+		else {
+			size_t currentIndex{};
+			singlyLinkedListNode<T>* node = _first;
+			while (currentIndex != index - 1) {
+				currentIndex++;
+				node = node->_next;
+			}
+			singlyLinkedListNode<T>* temp = node->_next;
+			node->_next = node->_next->_next;
+			delete temp;
 		}
 	}
 	//Удаление первого элемента списка.
@@ -255,7 +303,7 @@ public:
 	//Сдвиг вправо на k позиций.
 	void rightShift(size_t k) {
 		if (k == 0) return;
-		if (size() == 0 || size() == 1) return;
+		if (isEmpty() || size() == 1) return;
 		k %= size(); //Определяем число перестановок.
 
 		singlyLinkedListNode<T>* newLastNode = _first;
@@ -275,7 +323,7 @@ public:
 	//Сдвиг влево на k позиций.
 	void leftShift(size_t k) {
 		if (k == 0) return;
-		if (size() == 0 || size() == 1) return;
+		if (isEmpty() || size() == 1) return;
 		k %= size(); //Определяем число перестановок.
 
 		singlyLinkedListNode<T>* newLastNode = _first;
@@ -308,8 +356,10 @@ private:
 			index--;
 		}
 	}
-	//Проверяет, содержит ли список данный узел.
+	//Проверяет, содержит ли список указанный узел.
 	bool contains(const singlyLinkedListNode<T>* const node) const {
+		if (node == nullptr) throw std::invalid_argument("node is nullptr");
+
 		singlyLinkedListNode<T>* currentNode = _first;
 		while (currentNode != nullptr) {
 			if (currentNode == node) return true;
@@ -320,7 +370,7 @@ private:
 	//Разбивает часть списка, начинающуюся с указанного узла, на две половины.
 	//Первая половина записывается в исходный список, а вторая половина возвращается в виде указателя.
 	singlyLinkedList<T>* split(const singlyLinkedListNode<T>* const node) {
-		if (node == nullptr) return nullptr;
+		if (node == nullptr) throw std::invalid_argument("node is nullptr");
 
 		//Объявляем два указателя: один быстрее другого в два раза.
 		singlyLinkedListNode<T>* slow = const_cast<singlyLinkedListNode<T>*>(node); //В дальнейшем slow станет последним узлом первой половины списка.
@@ -346,6 +396,7 @@ private:
 	//Возвращает указатель на первое вхождение в список указанного значения.
 	//Если такого вхождения нет, то возвращается nullptr.
 	friend singlyLinkedListNode<T>* find(const singlyLinkedList<T>* const list, const T& value) {
+		if (list == nullptr) throw std::invalid_argument("list is nullptr");
 		if (list->_first == nullptr) return nullptr;
 
 		singlyLinkedListNode<T>* node = list->_first;
@@ -355,25 +406,24 @@ private:
 		}
 		return nullptr;
 	}
-	//Вставка элемента после указанного узла.
+	//Вставка элемента после указанного узла списка.
 	//Возвращает указатель на добавленный элемент.
-	//Если указанного узла нет в списке, то возвращается nullptr.
-	const singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* node, const T& value) {
-		if (_first == nullptr || node == nullptr) return nullptr;
-		if (!contains(node)) throw std::invalid_argument("singlyLinkedList doesn't have node");
+	//Нет проверки на наличие узла в списке!
+	const singlyLinkedListNode<T>* insert_after(singlyLinkedListNode<T>* const node, const T& value) {
+		if (node == nullptr) throw std::invalid_argument("node is nullptr");
+		if (_first == nullptr) return nullptr;
 
 		singlyLinkedListNode<T>* newNode = new singlyLinkedListNode<T>{ value, node->_next };
 		node->_next = newNode;
 		_size++;
 		return newNode;
 	}
-	//Вставка элемента перед указанным узлом.
+	//Вставка элемента перед указанным узлом списка.
 	//Возвращает указатель на добавленный элемент.
-	//Если указанного узла нет в списке, то возвращается nullptr.
-	const singlyLinkedListNode<T>* insert_before(const singlyLinkedListNode<T>* node, const T& value) {
-		if (_first == nullptr || node == nullptr) return nullptr;
-		//if (!hasNode(node)) return nullptr;
-		//Проверка излишне увеличит время выполнения метода в два раза.
+	//Нет проверки на наличие узла в списке!
+	const singlyLinkedListNode<T>* insert_before(const singlyLinkedListNode<T>* const node, const T& value) {
+		if (node == nullptr) throw std::invalid_argument("node is nullptr");
+		if (_first == nullptr) return nullptr;
 
 		if (_first == node) {
 			push_front(value); //_size меняется внутри метода push_front()
