@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <unordered_set>
 #include <functional>
+#include <initializer_list>
 
 
 
@@ -57,6 +58,10 @@ public:
 			node = node->_next;
 		}
 	}
+	//Конструктор с инициализацией элементов.
+	singlyLinkedList(std::initializer_list<T> init) : _first(nullptr), _last(nullptr) {
+		for (const T& value : init) push_back(value);
+	}
 	//Деструктор.
 	~singlyLinkedList() {
 		clear();
@@ -75,6 +80,12 @@ public:
 			}
 			return *this;
 		}
+	}
+	//Оператор присваивания.
+	singlyLinkedList<T>& operator=(std::initializer_list<T> init) {
+		clear();
+		for (const T& x : init) push_back(x);
+		return *this;
 	}
 	//Оператор вывода в поток.
 	friend std::ostream& operator<<(std::ostream& os, const singlyLinkedList<T>& list) {
@@ -112,6 +123,22 @@ public:
 			index--;
 		}
 		return node->_data;
+	}
+	//Оператор сравнения на равенство.
+	bool operator==(const singlyLinkedList<T>& other) const {
+		singlyLinkedListNode<T>* node1 = _first;
+		singlyLinkedListNode<T>* node2 = other._first;
+
+		while (node1 != nullptr && node2 != nullptr) {
+			if (node1->_data != node2->_data) {
+				return false;
+			}
+			node1 = node1->_next;
+			node2 = node2->_next;
+		}
+
+		// Проверка на равенство по длине списков
+		return node1 == nullptr && node2 == nullptr;
 	}
 
 	//Возвращает реверсированный исходный линейный односвязный список.
@@ -206,6 +233,16 @@ public:
 		return result;
 	}
 
+	//Возвращает первый элемент списка.
+	T front() const {
+		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
+		return _first->_data;
+	}
+	//Возвращает последний элемент списка.
+	T top() const {
+		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
+		return _last->_data;
+	}
 	//Возвращает размер списка.
 	size_t size() const {
 		return _size;
@@ -455,5 +492,11 @@ private:
 		return newNode;
 	}
 };
+//Оператор сравнения.
+template<typename T>
+bool operator==(const singlyLinkedList<T>& list, std::initializer_list<T> init) {
+	singlyLinkedList<T> temp{ init };
+	return list == temp;
+}
 
 #endif __SINGLYLINKEDLIST_
