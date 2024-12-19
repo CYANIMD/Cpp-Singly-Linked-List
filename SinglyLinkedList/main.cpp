@@ -94,7 +94,15 @@ int main() {
 	std::cout << "Линейный односвязный через оператор <<: " << *sll1 << std::endl;
 	auto secondPart = sll1->divideInHalf(); // 13 21
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
-	secondPart->insert(3, -2);
+	secondPart->insert(3, -100);
 	std::cout << "Вторая часть линейного односвязного списка через оператор <<: " << *secondPart << std::endl;
+
+	auto res = *merge(sll1, secondPart);
+
+	std::cout << "Слияние двух частей:" << res << std::endl;
+
+
+	singlyLinkedList<int> ls1{};
+	singlyLinkedList<int> ls2{l1};
 
 }

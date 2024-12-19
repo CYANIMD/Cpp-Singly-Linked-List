@@ -39,20 +39,22 @@ private:
 		}
 	};
 private:
-	//Указатель на первый элемент списка.
+	//Указатель на первый узел списка.
 	singlyLinkedListNode<T>* _first;
+	//Указатель на последний узел списка.
+	singlyLinkedListNode<T>* _last;
 	//Размер списка.
 	size_t _size;
 public:
 	//Конструктор по умолчанию.
-	singlyLinkedList() : _first(nullptr), _size(0) {}
+	singlyLinkedList() : _first(nullptr), _last(nullptr), _size(0) {}
 	//Конструктор копии.
-	singlyLinkedList(const singlyLinkedList<T>& other) : _size(other.size()), _first(nullptr) {
-		size_t count = other.size();
-		if (count == 0) return;
-		while (count != 0) {
-			push_front(other[count - 1]);
-			count--;
+	singlyLinkedList(const singlyLinkedList<T>& other) : _size(0), _first(nullptr), _last(nullptr) {
+		if (other.isEmpty()) return;
+		singlyLinkedListNode<T>* node = other._first;
+		while (node != nullptr) {
+			push_back(node->_data);
+			node = node->_next;
 		}
 	}
 	//Деструктор.
@@ -64,11 +66,11 @@ public:
 	singlyLinkedList<T>& operator=(const singlyLinkedList<T>& other) {
 		if (this != &other) {
 			clear();
-			size_t count = other.size();
-			if (count != 0) {
-				while (count != 0) {
-					push_front(other[count - 1]);
-					count--;
+			if (!other.isEmpty()) {
+				singlyLinkedListNode<T>* node = other._first;
+				while (node != nullptr) {
+					push_back(node->_data);
+					node = node->_next;
 				}
 			}
 			return *this;
@@ -87,6 +89,8 @@ public:
 	T& operator[](size_t index) {
 		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
 		if (index >= size()) throw std::invalid_argument("index >= size()");
+		if (index == 0) return _first->_data;
+		if (index == size() - 1) return _last->_data;
 
 		singlyLinkedListNode<T>* node = _first;
 		while (index != 0) { //Важно избежать проблем с памятью из-за типа index!
@@ -99,6 +103,8 @@ public:
 	const T& operator[](size_t index) const {
 		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
 		if (index >= size())throw std::invalid_argument("index >= size()");
+		if (index == 0) return _first->_data;
+		if (index == size() - 1) return _last->_data;
 
 		singlyLinkedListNode<T>* node = _first;
 		while (index != 0) { //Важно избежать проблем с памятью из-за типа index!
@@ -160,13 +166,11 @@ public:
 		do {
 			size2--;
 			result->push_front((*list2)[size2]);
-
 		} while (size2 != 0);
 		size_t size1 = list1->size();
 		do {
 			size1--;
 			result->push_front((*list1)[size1]);
-
 		} while (size1 != 0);
 		return result;
 	}
@@ -217,7 +221,7 @@ public:
 	}
 	//Проверяет, пустой ли список.
 	bool isEmpty() const {
-		return _first == nullptr && _size == 0;
+		return _first == nullptr && _last == nullptr && _size == 0;
 	}
 	//Очистка списка с высвобождением затрачиваемой памяти.
 	void clear() {
@@ -227,25 +231,26 @@ public:
 			delete node;
 		}
 		_size = 0;
+		_last = nullptr;
+		//_first автоматически станет равным nullptr.
 	}
 	//Добавление элемента в начало списка.
 	//Возвращает указатель на добавленный элемент.
 	void push_front(const T& value) {
 		_first = new singlyLinkedListNode<T>{ value, _first };
+		if (_last == nullptr) _last = _first;
 		_size++;
 	}
 	//Добавление элемента в конец списка.
 	//Возвращает указатель на добавленный элемент.
 	void push_back(const T& value) {
-		if (_first == nullptr) {
+		if (isEmpty()) {
 			push_front(value); //_size меняется внутри push_front()
 			return;
 		}
-		singlyLinkedListNode<T>* currentNode = _first;
-		while (currentNode->_next != nullptr) {
-			currentNode = currentNode->_next;
-		}
-		currentNode->_next = new singlyLinkedListNode<T>{ value };
+		singlyLinkedListNode<T>* node = new singlyLinkedListNode<T>{ value };
+		_last->_next = node;
+		_last = node;
 		_size++;
 	}
 	//Добавление элемента в указанный индекс списка.
@@ -284,7 +289,7 @@ public:
 	}
 	//Удаление последнего элемента списка.
 	void pop_back() {
-		if (_first == nullptr) return;
+		if (isEmpty()) return;
 
 		if (_first->_next == nullptr) {
 			delete _first;
@@ -349,16 +354,21 @@ private:
 	//Возвращает узел с указанным индексом.
 	const singlyLinkedListNode<T>* getNode(size_t index) const {
 		if (index >= size()) throw std::invalid_argument("index >= size()");
+		if (index == 0) return _first;
+		if (index == size() - 1) return _last;
 		singlyLinkedListNode<T>* node = _first;
 		while (node != nullptr) {
 			if (index == 0) return node;
 			node = node->_next;
 			index--;
 		}
+		return nullptr;
 	}
 	//Проверяет, содержит ли список указанный узел.
 	bool contains(const singlyLinkedListNode<T>* const node) const {
 		if (node == nullptr) throw std::invalid_argument("node is nullptr");
+		if (node == _first) return true;
+		if (node == _last) return true;
 
 		singlyLinkedListNode<T>* currentNode = _first;
 		while (currentNode != nullptr) {
@@ -379,6 +389,7 @@ private:
 			slow = slow->_next;
 			fast = fast->_next->_next;
 		}
+		_last = slow;
 		singlyLinkedListNode<T>* secondHalfPart = slow->_next; //Указатель на вторую половину списка.
 		slow->_next = nullptr;
 		singlyLinkedList<T>* result = new singlyLinkedList<T>{};
@@ -387,6 +398,7 @@ private:
 		int count{ 0 }; //Число узлов во второй половине списка.
 		while (secondHalfPart != nullptr) {
 			count++;
+			if (secondHalfPart->_next == nullptr) result->_last = secondHalfPart;
 			secondHalfPart = secondHalfPart->_next;
 		}
 		result->_size = count;
