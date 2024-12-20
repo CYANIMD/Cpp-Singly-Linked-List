@@ -103,6 +103,7 @@ int main() {
 
 
 	singlyLinkedList<int> ls1{};
+	ls1.rightShift(0);
 	singlyLinkedList<int> ls2{ls1};
 	ls1.push_back(1);
 	ls1.push_back(1);
@@ -111,6 +112,8 @@ int main() {
 	ls1.push_back(5);
 
 	auto re = *distinct(&ls1);
-	std::cout << "Без повторений: " << re;
-	l1 = { 1, 2 };
+	std::cout << "Без повторений: " << re << std::endl;
+	l1 = { -1, 1 };
+	l1.rightShift(2);
+	std::cout << l1;
 }

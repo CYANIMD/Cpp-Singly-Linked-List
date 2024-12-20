@@ -300,6 +300,7 @@ public:
 	}
 	//Удаление элемента списка с указанным индексом.
 	void remove(size_t index) {
+		if (isEmpty()) throw std::invalid_argument("singlyLinkedList is empty");
 		if (index >= size()) throw std::invalid_argument("index >= size()");
 		if (index == 0) pop_front();
 		else if (index == size() - 1) pop_back();
@@ -317,7 +318,7 @@ public:
 	}
 	//Удаление первого элемента списка.
 	void pop_front() {
-		if (_first == nullptr) return;
+		if (isEmpty()) return;
 
 		singlyLinkedListNode<T>* node = _first;
 		_first = _first->_next;
@@ -344,9 +345,10 @@ public:
 	}
 	//Сдвиг вправо на k позиций.
 	void rightShift(size_t k) {
-		if (k == 0) return;
-		if (isEmpty() || size() == 1) return;
+		if (k < 0) throw std::invalid_argument("k < 0");
+		if (size() <= 1) return;
 		k %= size(); //Определяем число перестановок.
+		if (k == 0) return;
 
 		singlyLinkedListNode<T>* newLastNode = _first;
 		for (size_t i{ 0 }; i < size() - k - 1; i++) {
@@ -364,9 +366,10 @@ public:
 	}
 	//Сдвиг влево на k позиций.
 	void leftShift(size_t k) {
-		if (k == 0) return;
-		if (isEmpty() || size() == 1) return;
+		if (k < 0) throw std::invalid_argument("k < 0");
+		if (size() <= 1) return;
 		k %= size(); //Определяем число перестановок.
+		if (k == 0) return;
 
 		singlyLinkedListNode<T>* newLastNode = _first;
 		for (size_t i{ 0 }; i < k - 1; i++) {
