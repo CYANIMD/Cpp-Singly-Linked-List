@@ -18,7 +18,7 @@ n\m - размер линейного односвязного списка;
 |isEmpty()|O(1)|O(1)|
 |clear()|O(n)|O(1)|
 |push_front(const T&)|O(1)|O(1)|
-|push_back(const T&)|O(n)|O(1)|
+|push_back(const T&)|O(1)|O(1)|
 |pop_front()|O(1)|O(1)|
 |pop_back()|O(n)|O(1)|
 |rightLeft(size_t)|O(n)|O(1)|
